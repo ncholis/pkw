@@ -3,17 +3,22 @@ from statistics import mean
 
 
 class PengunjungQuerySet(models.QuerySet):
+    def prediction_next_month(self):
+        forecast = self.dataset_forecast()
+        ret = sum(forecast) / len(forecast)
+        return ret
+
     def dataset_date(self):
         if not self.exists():
             return []
         
-        dd = [d.strftime('%Y-%M')  for d in self.values_list('date', flat=True)]
+        dd = [d.strftime('%Y-%m')  for d in self.values_list('date', flat=True)]
         return dd
 
     def dataset_actual(self):
         if not self.exists():
             return []
-        return list(self.values_list('dewasa', flat=True))
+        return list(self.values_list('jumlah', flat=True))
     
     def dataset_forecast(self, cast=2):
         data_actual = self.dataset_actual()
@@ -27,7 +32,6 @@ class PengunjungQuerySet(models.QuerySet):
                 data = data_actual[:index]
             else:
                 data = data_actual[index-3:index]
-            print('data: %s' % data)
             v_average = sum(data) / len(data)
             results.append(v_average)
         
@@ -54,12 +58,11 @@ class PengunjungManager(models.Manager):
 
 class Pengunjung(models.Model):
     class Meta:
-        verbose_name = 'Pengunjung'
-        verbose_name_plural = 'Pengunjung'
+        verbose_name = 'Kunjungan'
+        verbose_name_plural = 'Kunjungan'
 
     date = models.DateField()
-    dewasa = models.PositiveIntegerField(default=0)
-    anak = models.PositiveIntegerField(default=0)
+    jumlah = models.PositiveIntegerField(default=0)
     objects = PengunjungManager()
     _already_clean = False
 
